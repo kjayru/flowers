@@ -40,20 +40,24 @@ $token = $result['token'];
 
 
 // Set some options - we are passing in a useragent too here
-$headers = array(     
-    "Authorization" => "Bearer$token", 
-);
+$headers =array(
+    'Content-Type: application/json',
+    'Authorization: Bearer ' .$token
+    );
+
 
 $url = "http://flowers.test/wp-json/wp/v2/flores_panel/$id";
 
-   $post = array(
+   $post = json_encode(array(
     'status' => $estado,
     'precio' => $precio,
-   );
+    'content' => $descripcion
+   ));
     
-    $post = http_build_query($post);
+    //$post = http_build_query($post);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
@@ -62,17 +66,19 @@ $url = "http://flowers.test/wp-json/wp/v2/flores_panel/$id";
 
     $result2 = curl_exec($ch);
     $res = json_decode($result2, true);
+    $info = curl_getinfo($ch);
 
-    if (curl_errno($ch)) {
-    echo 'Error:' . curl_error($ch);
-    }
-    curl_close ($ch);
+    print_r($res);
+
+    //print_r(curl_error($ch));
+    
+    curl_close($ch);
 
    
 
-    print_r($res);
-    print_r($headers);
-    print_r($post);
+    //print_r($res);
+    //print_r($headers);
+    //print_r($post);
 
 // Send the request & save response to $resp
 
