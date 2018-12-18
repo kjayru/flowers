@@ -1,70 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-    
 
 <?php
-  $username = 'josepolack@babyflowers.pe';
-  // $username = $_POST['username'];
-   //$password = 'josepolack@babyflowers.pe';
-  $password = 'Diegoymajo1!';
-
-$id = $_GET['prod_id'];
-$estado = $_GET['estado'];
-//$precio = $_POST['precio'];
-//$descripcion = $_POST['descripcion'];
-?>
-<div>Token: <label class="token"></label></div>
-<div class="respuesta">
-    <label></label>
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script>
-
-var datasend = ({'username':'<?php echo $username ?>', 'password':'<?php echo $password ?>' });
-
-$.ajax({
-    url:'http://flowers.test/wp-json/jwt-auth/v1/token',
-   
-    method: 'POST',
-    data:datasend,
-    dataType:'json',
-    success:function(response){
-       
-        localStorage.setItem('token', response.token);
-    }
-});
-let itoken = localStorage.getItem("token");
-$(".token").html(itoken);
-
-var datasend2 = ({'status': '<?php echo $estado; ?>'});
 
 
-$.ajax({
-    url:'http://flowers.test/wp-json/wp/v2/flores_panel/<?php echo $id; ?>', 
-    headers:{
-        'Authorization': 'Bearer' +itoken,
-    },
-    method: 'POST',
-    data:datasend2,
-    success:function(response){ 
-        
-        $(".respuesta").html(response);
-    }
-});
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$id = $_POST['prod_id'];
+$estado = $_POST['estado'];
+$precio = $_POST['precio'];
+$descripcion = $_POST['descripcion'];
+
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+    CURLOPT_RETURNTRANSFER => 1,
+    CURLOPT_URL => 'https://babyflowers.pe/wp-json/jwt-auth/v1/token',
+    CURLOPT_USERAGENT => 'request token',
+    CURLOPT_POST => 1,
+    CURLOPT_POSTFIELDS => array(
+        'username' => $username,
+        'password' => $password
+    )
+));
+
+$resp = curl_exec($curl);
+$result = json_decode($resp, true);
+curl_close ($curl);
+//retorna TOKEN 
+$token = $result['token'];
+
+///sendata update
+$headers =array(
+    'Content-Type: application/json',
+    'Authorization: Bearer ' .$token
+    );
 
 
+$url = "https://babyflowers.pe/wp-json/wp/v2/flores_panel/$id";
 
- 
-</script>
-<?php 
-echo json_encode(["rpta"=>"Proceso realizado satisfactoriamente"]);
-?>
-</body>
-</html>   
+   $post = json_encode(array(
+    'status' => $estado,
+    'precio' => $precio,
+    'content' => $descripcion
+   ));
+    
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+    curl_setopt($ch, CURLOPT_POST, 1);
+
+
+    $result2 = curl_exec($ch);
+    $res = json_decode($result2, true);
+    $info = curl_getinfo($ch);
+
+    print_r($res); 
+    curl_close($ch);
+
+

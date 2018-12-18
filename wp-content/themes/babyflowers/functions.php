@@ -112,11 +112,11 @@ add_action( 'init', 'flores_type_rest_support', 25 );
   	global $wp_post_types;
   
   	$post_type_name = 'flores_panel';
-  	if( isset( $wp_post_types[ $post_type_name ] ) ) {
-  		$wp_post_types[$post_type_name]->show_in_rest = true;
-  		$wp_post_types[$post_type_name]->rest_base = $post_type_name;
-  		$wp_post_types[$post_type_name]->rest_controller_class = 'WP_REST_Posts_Controller';
-  	}
+		if( isset( $wp_post_types[ $post_type_name ] ) ) {
+			$wp_post_types[$post_type_name]->show_in_rest = true;
+			$wp_post_types[$post_type_name]->rest_base = $post_type_name;
+			$wp_post_types[$post_type_name]->rest_controller_class = 'WP_REST_Posts_Controller';
+		}
   
   }
 
@@ -129,12 +129,23 @@ add_action( 'init', 'flores_type_rest_support', 25 );
 		  
 		  array(
 			  'get_callback' => 'show_fields',
-			  'update_callback' => 'show_fields', 
+			  'update_callback' => 'update_fields', 
    			   'schema' => null
 		  )
 		);
   }
 
-  function show_fields($object, $field_name, $request){
-	  return get_post_meta($object['id'],$field_name,true);
-  }
+	function show_fields($object, $field_name, $request){
+		
+		return get_post_meta($object['id'],$field_name,true);
+	}
+
+
+	function update_fields($value, $object, $field_name){
+		
+		if ( ! $value || ! is_string( $value ) ) {
+			return;
+		}
+	
+		return update_post_meta( $object->ID, $field_name, strip_tags( $value ) );
+	}
